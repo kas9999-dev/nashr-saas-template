@@ -1,4 +1,4 @@
-// backend/server.js (Production-ready for Demo Deploy on Render/Railway)
+// backend/server.js (Routing-fixed: / => landing.html , /app => app.html)
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -11,6 +11,8 @@ const app = express();
 
 /**
  * CORS (Demo-safe)
+ * - If FRONTEND_ORIGIN is set (e.g. https://your-landing.netlify.app), we allow only that origin.
+ * - Otherwise allow all (OK for private demo, but tighten for production).
  */
 const FRONTEND_ORIGIN = (process.env.FRONTEND_ORIGIN || "").trim();
 app.use(
@@ -26,8 +28,9 @@ app.use(express.json({ limit: "2mb" }));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve frontend as static
 const FRONTEND_DIR = path.join(__dirname, "../frontend");
+
+// Serve static assets (css/js/images) from /frontend
 app.use(express.static(FRONTEND_DIR));
 
 function requireEnv(name) {
@@ -119,15 +122,6 @@ function buildUserPrompt(payload) {
 // Health check
 app.get("/health", (req, res) => res.json({ ok: true }));
 
-// صفحات الواجهة
-app.get("/", (req, res) => {
-  res.sendFile(path.join(FRONTEND_DIR, "landing.html"));
-});
-
-app.get("/app", (req, res) => {
-  res.sendFile(path.join(FRONTEND_DIR, "app.html"));
-});
-
 // Main run
 app.post("/api/run", async (req, res) => {
   try {
@@ -189,7 +183,24 @@ app.post("/api/suggest-trend", async (req, res) => {
   }
 });
 
-// Fallback: لو دخل على رابط غير موجود، رجعه للـ Landing
+/**
+ * ✅ Pages routing (important: after APIs)
+ * /      -> landing.html
+ * /app   -> app.html
+ */
+app.get("/", (req, res) => {
+  res.sendFile(path.join(FRONTEND_DIR, "landing.html"));
+});
+
+app.get("/app", (req, res) => {
+  res.sendFile(path.join(FRONTEND_DIR, "app.html"));
+});
+
+// Optional: if someone opens /index.html or /app.html, redirect nicely
+app.get("/index.html", (req, res) => res.redirect(302, "/"));
+app.get("/app.html", (req, res) => res.redirect(302, "/app"));
+
+// Fallback: any unknown route -> landing (or change to 404 if you prefer)
 app.get("*", (req, res) => {
   res.sendFile(path.join(FRONTEND_DIR, "landing.html"));
 });
