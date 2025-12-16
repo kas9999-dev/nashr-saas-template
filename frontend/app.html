@@ -4,26 +4,60 @@
   <meta charset="UTF-8" />
   <title>Nashr – تجربة التوليد</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
-    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top,#15203a,#0b1220);color:#e6ebf2}
-    .container{max-width:900px;margin:auto;padding:40px 20px}
-    h1{text-align:center;margin-bottom:12px}
-    .sub{text-align:center;color:#9aa4b2;margin-bottom:22px}
-    .card{background:#111a2e;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;margin-bottom:18px}
-    label{display:block;margin-bottom:6px;font-size:14px;color:#9aa4b2}
-    textarea,select{width:100%;background:#0b1220;color:#e6ebf2;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px;font-size:14px;margin-bottom:14px;outline:none}
-    textarea{min-height:140px;resize:vertical}
-    button{width:100%;background:#4da3ff;color:#fff;border:none;padding:14px 26px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer}
-    button:disabled{opacity:.6;cursor:not-allowed}
-    .output{white-space:pre-wrap;line-height:1.8;font-size:15px;background:#0b1220;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;min-height:120px}
-    .meta{display:flex;gap:10px;justify-content:space-between;margin-top:10px;color:#9aa4b2;font-size:12px}
-    .pill{border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.04)}
-    footer{text-align:center;margin-top:26px;color:#9aa4b2;font-size:13px}
-    a{color:#9fc7ff}
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #15203a, #0b1220);
+      color: #e6ebf2;
+    }
+    .container { max-width: 900px; margin: auto; padding: 40px 20px; }
+    h1 { text-align: center; margin-bottom: 10px; }
+    .sub { text-align: center; color: #9aa4b2; margin-bottom: 22px; }
+
+    .card {
+      background: #111a2e;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    label { display:block; margin-bottom:6px; font-size:14px; color:#9aa4b2; }
+    textarea, select {
+      width:100%; background:#0b1220; color:#e6ebf2;
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:10px; padding:12px; font-size:14px;
+      margin-bottom:14px;
+    }
+    textarea { min-height:140px; resize:vertical; }
+
+    button {
+      width:100%; background:#4da3ff; color:#fff;
+      border:none; padding:14px; border-radius:12px;
+      font-size:15px; font-weight:800; cursor:pointer;
+    }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+
+    .output {
+      white-space:pre-wrap; line-height:1.8; font-size:15px;
+      background:#0b1220; border:1px solid rgba(255,255,255,.12);
+      border-radius:12px; padding:14px; min-height:120px;
+    }
+
+    .meta {
+      display:flex; justify-content:space-between;
+      color:#9aa4b2; font-size:12px; margin-top:8px;
+    }
+
+    footer { text-align:center; margin-top:24px; color:#9aa4b2; font-size:13px; }
   </style>
 </head>
+
 <body>
   <div class="container">
+
     <h1>🧠 Nashr – تجربة التوليد الذكي</h1>
     <div class="sub">اكتب الفكرة، اختر المنصة، واضغط توليد</div>
 
@@ -41,8 +75,8 @@
       <button id="runBtn" type="button">توليد المحتوى</button>
 
       <div class="meta">
-        <span class="pill">API: /api/run</span>
-        <span class="pill"><a href="/health" target="_blank" rel="noopener">health</a></span>
+        <span>API: /api/run</span>
+        <a href="/health" target="_blank">health</a>
       </div>
     </div>
 
@@ -50,8 +84,8 @@
       <label>النتيجة</label>
       <div id="output" class="output">—</div>
       <div class="meta">
-        <span class="pill" id="status">الحالة: جاهز</span>
-        <span class="pill" id="debug">—</span>
+        <span id="status">الحالة: جاهز</span>
+        <span id="debug">—</span>
       </div>
     </div>
 
@@ -59,45 +93,45 @@
   </div>
 
 <script>
-  const btn = document.getElementById("runBtn");
-  const out = document.getElementById("output");
-  const status = document.getElementById("status");
-  const debug = document.getElementById("debug");
+const btn = document.getElementById("runBtn");
+const out = document.getElementById("output");
+const status = document.getElementById("status");
+const debug = document.getElementById("debug");
 
-  btn.addEventListener("click", run);
+btn.onclick = async () => {
+  const text = document.getElementById("text").value.trim();
+  const platform = document.getElementById("platform").value;
 
-  async function run(){
-    const text = document.getElementById("text").value.trim();
-    const platform = document.getElementById("platform").value;
+  if (!text) { alert("اكتب الفكرة أولاً"); return; }
 
-    if(!text){ alert("اكتب الفكرة أولاً"); return; }
+  btn.disabled = true;
+  out.textContent = "⏳ جاري التوليد...";
+  status.textContent = "الحالة: جاري الإرسال...";
+  debug.textContent = "—";
 
-    btn.disabled = true;
-    out.innerText = "⏳ جاري التوليد...";
-    status.textContent = "الحالة: جاري الإرسال...";
-    debug.textContent = "—";
+  try {
+    const res = await fetch("/api/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, platform })
+    });
 
-    try{
-      const res = await fetch("/api/run", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ text, platform, tone:"احترافية", audience:"رواد الأعمال" })
-      });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || "فشل التوليد");
 
-      const data = await res.json();
-      if(!res.ok || !data.ok) throw new Error(data.error || ("HTTP " + res.status));
+    out.textContent = data.output || "لا يوجد ناتج";
+    status.textContent = "الحالة: تم ✅";
+    debug.textContent = "HTTP " + res.status;
 
-      out.innerText = data.output || "لا يوجد ناتج";
-      status.textContent = "الحالة: تم ✅";
-      debug.textContent = "HTTP " + res.status;
-    }catch(e){
-      out.innerText = "❌ خطأ: " + (e.message || e);
-      status.textContent = "الحالة: فشل ❌";
-      debug.textContent = "تحقق من /health و ENV";
-    }finally{
-      btn.disabled = false;
-    }
+  } catch (e) {
+    out.textContent = "❌ خطأ: " + e.message;
+    status.textContent = "الحالة: فشل ❌";
+    debug.textContent = "راجع /health و Logs";
+  } finally {
+    btn.disabled = false;
   }
+};
 </script>
+
 </body>
 </html>

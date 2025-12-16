@@ -15,7 +15,13 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.static(FRONTEND_DIR, { index: false }));
 
 // ===== API =====
-app.post("/api/run", apiRun);
+app.post("/api/run", (req, res, next) => {
+  console.log("🔥 /api/run HIT", {
+    hasBody: Boolean(req.body),
+    keys: req.body ? Object.keys(req.body) : [],
+  });
+  next();
+}, apiRun);
 
 // ===== Health =====
 app.get("/health", (req, res) => {
